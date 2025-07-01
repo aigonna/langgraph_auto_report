@@ -58,32 +58,32 @@ Return format requirements:
 - If the task is determined to be unfeasible, return an empty array for steps and empty string for goal
 
 EXAMPLE JSON OUTPUT:
-{
+{{
    "thought": "Analyzing the user request for data analysis and report generation...",
    "goal": "Complete data analysis and generate comprehensive report",
    "steps": [
-      {  
+      {{  
             "title": "Data Loading and Exploration",
             "description": "Load the dataset, examine structure, check data types and identify missing values",
             "status": "pending"
-      },
-      {
+      }},
+      {{
             "title": "Data Analysis and Visualization", 
             "description": "Perform statistical analysis, create charts and graphs to identify patterns",
             "status": "pending"
-      },
-      {
+      }},
+      {{
             "title": "Report Generation",
             "description": "Create markdown report with findings, insights, and visualizations",
             "status": "pending"
-      },
-      {
+      }},
+      {{
             "title": "Presentation Creation",
             "description": "Generate PowerPoint presentation summarizing key findings",
             "status": "pending"
-      }
+      }}
    ]
-}
+}}
 
 Create a plan according to the following requirements:
 - Provide as much detail as possible for each step
