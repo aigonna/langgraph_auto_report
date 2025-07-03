@@ -163,8 +163,14 @@ def execute_node(state: State):
                 tool_name = tool_call['name']
                 tool_args = tool_call['args']
                 
-                # Add task_folder to create_file calls
-                if tool_name == 'create_file' and state.get('task_folder'):
+                # 为所有需要task_folder的工具自动添加task_folder参数
+                tools_need_task_folder = [
+                    'create_file', 'data_statistics_analysis', 'create_visualization', 
+                    'trend_analysis', 'category_analysis', 'correlation_analysis', 
+                    'outlier_detection', 'data_export', 'read_file_content', 'list_files'
+                ]
+                
+                if tool_name in tools_need_task_folder and state.get('task_folder'):
                     tool_args['task_folder'] = state['task_folder']
                 
                 tool_result = tools[tool_name].invoke(tool_args)
@@ -227,8 +233,12 @@ def report_node(state: State):
                 tool_name = tool_call['name']
                 tool_args = tool_call['args']
                 
-                # Add task_folder to create_file calls
-                if tool_name == 'create_file' and state.get('task_folder'):
+                # 为所有需要task_folder的工具自动添加task_folder参数
+                tools_need_task_folder = [
+                    'create_file', 'data_export', 'read_file_content', 'list_files'
+                ]
+                
+                if tool_name in tools_need_task_folder and state.get('task_folder'):
                     tool_args['task_folder'] = state['task_folder']
                 
                 tool_result = tools[tool_name].invoke(tool_args)

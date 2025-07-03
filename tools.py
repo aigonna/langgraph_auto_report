@@ -32,26 +32,33 @@ def create_task_folder(user_message: str):
     :return: The path of the created task folder
     """
     try:
-        # Extract keywords from user message for folder naming
-        # Remove special characters and keep only letters, numbers, and spaces
-        clean_message = re.sub(r'[^\w\s-]', '', user_message.strip())
-        # Take first 30 characters and replace spaces with underscores
-        folder_name_base = clean_message[:30].replace(' ', '_').replace('　', '_')
+        # 创建更简洁的文件夹命名逻辑
+        timestamp = datetime.now().strftime("%m%d_%H%M")  # 简化时间戳：月日_时分
+        task_id = str(uuid.uuid4())[:6]  # 使用6位UUID，更简洁
         
-        # Generate UUID4 for uniqueness
-        task_id = str(uuid.uuid4())[:8]  # Use first 8 characters of UUID
+        # 根据用户消息智能识别任务类型
+        message_lower = user_message.lower()
+        if "csv" in message_lower and "分析" in user_message:
+            task_type = "csv_analysis"
+        elif "数据分析" in user_message or "data analysis" in message_lower:
+            task_type = "data_analysis"
+        elif "报告" in user_message or "report" in message_lower:
+            task_type = "report"
+        elif "汽车" in user_message or "automobile" in message_lower:
+            task_type = "auto_analysis"
+        elif "销量" in user_message or "sales" in message_lower:
+            task_type = "sales_analysis"
+        else:
+            task_type = "analysis"
         
-        # Create timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # 创建简洁的文件夹名：任务类型_时间戳_ID
+        folder_name = f"{task_type}_{timestamp}_{task_id}"
         
-        # Combine to create folder name
-        folder_name = f"{timestamp}_{folder_name_base}_{task_id}"
-        
-        # Create the full path
+        # 创建完整路径
         task_folder_path = os.path.join("output", folder_name)
         full_path = os.path.join(os.getcwd(), task_folder_path)
         
-        # Create the directory
+        # 创建目录
         os.makedirs(full_path, exist_ok=True)
         
         return {"messages": f"Successfully created task folder at {full_path}", "task_folder": task_folder_path}
@@ -68,6 +75,13 @@ def create_file(file_name: str, file_contents: str, task_folder: str = ""):
     :param task_folder: the task folder path (optional, if not provided will use output/)
     """
     try:
+        # 智能优化文件名
+        if not file_name.endswith('.md') and not file_name.endswith('.txt') and not file_name.endswith('.json'):
+            if "summary" in file_name or "analysis" in file_name or "report" in file_name:
+                file_name = f"{file_name}.md"
+            else:
+                file_name = f"{file_name}.txt"
+        
         # Use task folder if provided, otherwise use default output folder
         if task_folder:
             if not task_folder.startswith('output/'):
@@ -320,9 +334,23 @@ def create_visualization(file_path: str, chart_type: str, x_column: str, y_colum
         
         # 保存图表
         if task_folder:
+            # 智能优化图表文件名
+            if not save_name.endswith('.png'):
+                save_name = f"{save_name}.png"
+            
+            # 添加图表类型前缀，让文件名更有意义
+            if not save_name.startswith(('chart_', 'plot_', 'graph_')):
+                save_name = f"chart_{chart_type}_{save_name}"
+            
             chart_path = os.path.join(task_folder, save_name)
             full_chart_path = os.path.join(os.getcwd(), chart_path)
         else:
+            if not save_name.endswith('.png'):
+                save_name = f"{save_name}.png"
+            
+            if not save_name.startswith(('chart_', 'plot_', 'graph_')):
+                save_name = f"chart_{chart_type}_{save_name}"
+                
             chart_path = os.path.join("output", save_name)
             full_chart_path = os.path.join(os.getcwd(), chart_path)
         
@@ -589,16 +617,28 @@ def outlier_detection(file_path: str, column_name: str, method: str = "iqr", tas
 
 
 @tool
-def data_export(data_dict: dict, file_name: str, export_format: str = "json", task_folder: str = "") -> dict:
+def data_export(data_dict: Union[dict, str], file_name: str, export_format: str = "json", task_folder: str = "") -> dict:
     """
     导出数据到不同格式
-    :param data_dict: 要导出的数据字典
+    :param data_dict: 要导出的数据字典或字符串格式的字典
     :param file_name: 文件名（不含扩展名）
     :param export_format: 导出格式 ("json", "csv", "txt")
     :param task_folder: 任务文件夹路径
     :return: 导出结果
     """
     try:
+        # 如果输入是字符串，尝试解析为字典
+        if isinstance(data_dict, str):
+            try:
+                import ast
+                data_dict = ast.literal_eval(data_dict)
+            except:
+                try:
+                    data_dict = json.loads(data_dict)
+                except:
+                    # 如果无法解析，将字符串包装成字典
+                    data_dict = {"content": data_dict}
+        
         # 确定文件路径
         if task_folder:
             base_path = os.path.join(task_folder, file_name)
