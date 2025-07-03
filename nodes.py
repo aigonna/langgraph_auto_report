@@ -25,9 +25,9 @@ def get_llm():
     """获取LLM实例，使用LiteLLM统一适配多个模型"""
     
     # 从环境变量获取模型配置
-    model_name = os.getenv("MODEL_NAME", "gemini/gemini-2.0-flash-exp")  # 使用gemini/前缀强制走Google AI Studio
+    model_name = os.getenv("MODEL_NAME", "gemini/gemini-2.0-flash-exp")  # 恢复使用Gemini
     temperature = float(os.getenv("TEMPERATURE", "0.1"))
-    max_tokens = int(os.getenv("MAX_TOKENS", "128000"))  # Gemini-2.5-flash支持更大的token数
+    max_tokens = int(os.getenv("MAX_TOKENS", "128000"))  # Gemini支持更大的token数
     
     # 设置API密钥
     if "gpt" in model_name or "openai" in model_name:
@@ -91,10 +91,10 @@ def get_llm():
 llm = get_llm()
 
 # 打印当前配置
-logger.info(f"🤖 当前模型: {os.getenv('MODEL_NAME', 'gemini-2.5-flash')}")
+logger.info(f"🤖 当前模型: {os.getenv('MODEL_NAME', 'gemini/gemini-2.0-flash-exp')}")
 logger.info(f"🌡️  温度设置: {os.getenv('TEMPERATURE', '0.1')}")
 logger.info(f"📝 最大Token: {os.getenv('MAX_TOKENS', '128000')}")
-if os.getenv('GOOGLE_API_KEY') and "gemini" in os.getenv('MODEL_NAME', 'gemini-2.5-flash'):
+if os.getenv('GOOGLE_API_KEY') and "gemini" in os.getenv('MODEL_NAME', 'gemini/gemini-2.0-flash-exp'):
     logger.info(f"🔑 Gemini API配置: 已设置")
 elif os.getenv('OPENAI_BASE_URL') or os.getenv('openai_base_url'):
     logger.info(f"🌐 API地址: {os.getenv('OPENAI_BASE_URL', os.getenv('openai_base_url'))}")
