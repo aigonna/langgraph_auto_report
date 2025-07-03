@@ -13,8 +13,7 @@ from langchain_deepseek import ChatDeepSeek
 from langchain.chat_models import ChatOpenAI
 from state import State
 from prompts import (PLAN_SYSTEM_PROMPT, PLAN_CREATE_PROMPT,
-                     UPDATE_PLAN_PROMPT, EXECUTE_SYSTEM_PROMPT,
-                     EXECUTION_PROMPT, REPORT_SYSTEM_PROMPT)
+                     EXECUTE_SYSTEM_PROMPT, EXECUTION_PROMPT, REPORT_SYSTEM_PROMPT)
 from tools import create_file, create_task_folder, send_messages, shell_exec, str_replace
 from dotenv import load_dotenv
 load_dotenv('.env')
@@ -61,23 +60,6 @@ def create_planner_node(state: State):
     state['messages'] += [AIMessage(content=json.dumps(plan, ensure_ascii=False))]
     return Command(goto="execute", update={"plan": plan, "task_folder": task_folder})
 
-def update_planner_node(state: State):
-    logger.info("***正在运行Update Planner node***")
-    plan = state['plan']
-    goal = plan['goal']
-    state['messages'].extend([SystemMessage(content=PLAN_SYSTEM_PROMPT), HumanMessage(content=UPDATE_PLAN_PROMPT.format(plan = plan, goal=goal))])
-    messages = state['messages']
-    while True:
-        try:
-            response = llm.invoke(messages)
-            response = response.model_dump_json(indent=4, exclude_none=True)
-            response = json.loads(response)
-            plan = json.loads(extract_json(extract_answer(response['content'])))
-            state['messages']+=[AIMessage(content=json.dumps(plan, ensure_ascii=False))]
-            return Command(goto="execute", update={"plan": plan})
-        except Exception as e:
-            messages += [HumanMessage(content=f"json格式错误:{e}")]
-            
 def execute_node(state: State):
     logger.info("***正在运行execute_node***")
   
@@ -96,8 +78,9 @@ def execute_node(state: State):
         
     logger.info(f"当前执行STEP:{current_step}")
     
-    ## 此处只是简单跳转到report节点，实际应该根据当前STEP的描述进行判断
-    if current_step is None or current_step_index == len(steps)-1:
+    # 如果没有待执行的步骤，跳转到report节点
+    if current_step is None:
+        logger.info("所有步骤已完成，跳转到report节点")
         return Command(goto='report')
     
     # 过滤掉ToolMessage，只保留SystemMessage、HumanMessage和AIMessage
@@ -134,11 +117,22 @@ def execute_node(state: State):
         
     logger.info(f"当前STEP执行总结:{extract_answer(response['content'])}")
     
+    # 标记当前步骤为已完成
+    current_step['status'] = 'completed'
+    
     state['messages'] += [AIMessage(content=extract_answer(response['content']))]
     # 只添加执行总结到observations，不添加ToolMessage（避免格式问题）
     state['observations'] += [AIMessage(content=extract_answer(response['content']))]
     
-    return Command(goto='update_planner', update={'plan': plan})
+    # 检查是否还有未完成的步骤
+    remaining_pending_steps = [step for step in steps if step['status'] == 'pending']
+    
+    if remaining_pending_steps:
+        logger.info(f"还有 {len(remaining_pending_steps)} 个步骤待执行，继续执行")
+        return Command(goto='execute', update={'plan': plan})
+    else:
+        logger.info("所有步骤已完成，跳转到report节点")
+        return Command(goto='report', update={'plan': plan})
     
 
     
@@ -171,4 +165,5 @@ def report_node(state: State):
         else:
             break
             
+    logger.info("报告生成完成")
     return {"final_report": response['content']}

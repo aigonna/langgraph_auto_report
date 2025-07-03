@@ -6,7 +6,7 @@
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from state import State
-from nodes import (report_node, execute_node, create_planner_node, update_planner_node)
+from nodes import (report_node, execute_node, create_planner_node)
 
 
 def _build_base_graph() -> StateGraph:
@@ -16,7 +16,6 @@ def _build_base_graph() -> StateGraph:
     builder = StateGraph(State)
     builder.add_edge(START, 'create_planner')
     builder.add_node('create_planner', create_planner_node)
-    builder.add_node('update_planner', update_planner_node)
     builder.add_node('execute', execute_node)
     builder.add_node('report', report_node)
     builder.add_edge("report", END)
