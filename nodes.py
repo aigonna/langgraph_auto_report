@@ -25,9 +25,9 @@ def get_llm():
     """获取LLM实例，使用LiteLLM统一适配多个模型"""
     
     # 从环境变量获取模型配置
-    model_name = os.getenv("MODEL_NAME", "gpt-4o")  # 默认使用gpt-4o
+    model_name = os.getenv("MODEL_NAME", "gemini-2.5-flash") 
     temperature = float(os.getenv("TEMPERATURE", "0.1"))
-    max_tokens = 16384
+    max_tokens = int(os.getenv("MAX_TOKENS", "128000"))  # Gemini-2.5-flash支持更大的token数
     
     # 设置API密钥
     if "gpt" in model_name or "openai" in model_name:
@@ -38,7 +38,12 @@ def get_llm():
     elif "claude" in model_name:
         os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY", "")
     elif "gemini" in model_name:
-        os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY", "")
+        # Gemini配置 - 支持多种API密钥环境变量
+        gemini_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("google_api_key")
+        if gemini_key:
+            os.environ["GOOGLE_API_KEY"] = gemini_key
+        else:
+            logger.warning("⚠️ 未找到GOOGLE_API_KEY，请设置环境变量")
     elif "deepseek" in model_name:
         os.environ["DEEPSEEK_API_KEY"] = os.getenv("deepseek", "")
         os.environ["DEEPSEEK_API_BASE"] = "https://api.deepseek.com"
@@ -48,13 +53,28 @@ def get_llm():
         os.environ["ZHIPUAI_API_KEY"] = os.getenv("ZHIPUAI_API_KEY", "")
     
     try:
-        llm = ChatLiteLLM(
-            model=model_name,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            timeout=60,
-            max_retries=3
-        )
+        # Gemini-2.5-flash特殊配置
+        if "gemini" in model_name:
+            llm = ChatLiteLLM(
+                model=model_name,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=120,  # Gemini可能需要更长时间
+                max_retries=3,
+                # 添加Gemini特有的参数
+                model_kwargs={
+                    "top_p": 0.95,
+                    "top_k": 40
+                }
+            )
+        else:
+            llm = ChatLiteLLM(
+                model=model_name,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=60,
+                max_retries=3
+            )
         logger.info(f"✅ 成功初始化LiteLLM模型: {model_name}")
         return llm
     except Exception as e:
@@ -71,10 +91,12 @@ def get_llm():
 llm = get_llm()
 
 # 打印当前配置
-logger.info(f"🤖 当前模型: {os.getenv('MODEL_NAME', 'gpt-4o')}")
+logger.info(f"🤖 当前模型: {os.getenv('MODEL_NAME', 'gemini-2.5-flash')}")
 logger.info(f"🌡️  温度设置: {os.getenv('TEMPERATURE', '0.1')}")
-logger.info(f"📝 最大Token: {os.getenv('MAX_TOKENS', '4000')}")
-if os.getenv('OPENAI_BASE_URL') or os.getenv('openai_base_url'):
+logger.info(f"📝 最大Token: {os.getenv('MAX_TOKENS', '128000')}")
+if os.getenv('GOOGLE_API_KEY') and "gemini" in os.getenv('MODEL_NAME', 'gemini-2.5-flash'):
+    logger.info(f"🔑 Gemini API配置: 已设置")
+elif os.getenv('OPENAI_BASE_URL') or os.getenv('openai_base_url'):
     logger.info(f"🌐 API地址: {os.getenv('OPENAI_BASE_URL', os.getenv('openai_base_url'))}")
 
 def extract_json(text):
