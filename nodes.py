@@ -27,7 +27,7 @@ def get_llm():
     # 从环境变量获取模型配置
     model_name = os.getenv("MODEL_NAME", "gpt-4o")  # 默认使用gpt-4o
     temperature = float(os.getenv("TEMPERATURE", "0.1"))
-    max_tokens = int(os.getenv("MAX_TOKENS", "16384"))
+    max_tokens = 16384
     
     # 设置API密钥
     if "gpt" in model_name or "openai" in model_name:
