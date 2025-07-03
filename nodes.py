@@ -18,7 +18,10 @@ from tools import (create_file, create_task_folder, send_messages, shell_exec, s
                    category_analysis, correlation_analysis, outlier_detection, data_export,
                    read_file_content, list_files)
 from dotenv import load_dotenv
-load_dotenv('.env')
+
+# 强制加载.env文件
+load_dotenv('.env', override=True)
+logger.info(f"🔧 环境变量加载完成，GOOGLE_API_KEY: {'已设置' if os.getenv('GOOGLE_API_KEY') else '未设置'}")
 
 # LLM配置 - 使用 LiteLLM 统一适配
 def get_llm():
