@@ -300,51 +300,37 @@ Select appropriate tools to complete the <current_step> with deep, comprehensive
 </mandatory_tool_sequence>
 
 <step_specific_requirements>
-Based on your current step, execute these MANDATORY tool sequences:
+🚨 MANDATORY: Based on your current step, you MUST execute these tool sequences:
 
-**If step contains "数据加载" or "数据探索" or "Data Loading":**
-```
+**RULE 1: ALWAYS start with these 3 tools for ANY step:**
 1. read_csv_data(file_path="./data/China Automobile Sales Data.csv")
-2. data_statistics_analysis(file_path="./data/China Automobile Sales Data.csv", task_folder="[current_task_folder]")
-3. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="hist", x_column="units_sold", title="销量分布直方图", task_folder="[current_task_folder]", save_name="data_overview_distribution.png")
-4. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="bar", x_column="brand", y_column="units_sold", title="品牌销量总览", task_folder="[current_task_folder]", save_name="data_overview_brands.png")
-5. outlier_detection(file_path="./data/China Automobile Sales Data.csv", column_name="units_sold", method="both", task_folder="[current_task_folder]")
-6. create_file(file_name="data_overview_comprehensive_summary.md", file_contents="# 数据概览与质量分析报告\n\n## 数据基本信息\n[详细描述数据结构、字段含义、数据类型]\n\n## 统计分析结果\n[描述描述性统计、分布特征]\n\n## 数据质量评估\n[缺失值分析、异常值检测结果]\n\n## 可视化洞察\n[解释生成的图表，描述发现的模式]\n\n## 初步发现\n[基于数据探索的初步洞察]\n\n## 后续分析建议\n[建议下一步分析方向]", task_folder="[current_task_folder]")
-7. data_export(data_dict={"analysis_type": "data_overview", "findings": "comprehensive data exploration results"}, file_name="data_overview_results", export_format="json", task_folder="[current_task_folder]")
-```
+2. data_statistics_analysis(file_path="./data/China Automobile Sales Data.csv", task_folder=state_task_folder)
+3. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="bar", x_column="brand", y_column="units_sold", title="品牌销量对比", task_folder=state_task_folder, save_name="step_overview.png")
 
-**If step contains "分类分析" or "Categorical Analysis":**
-```
-1. read_csv_data(file_path="./data/China Automobile Sales Data.csv")
-2. category_analysis(file_path="./data/China Automobile Sales Data.csv", category_column="brand", value_column="units_sold", task_folder="[current_task_folder]")
-3. category_analysis(file_path="./data/China Automobile Sales Data.csv", category_column="body_type", value_column="units_sold", task_folder="[current_task_folder]")
-4. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="bar", x_column="brand", y_column="units_sold", title="品牌销量排名对比", task_folder="[current_task_folder]", save_name="categorical_brand_ranking.png")
-5. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="pie", x_column="brand", title="品牌市场份额分布", task_folder="[current_task_folder]", save_name="categorical_market_share.png")
-6. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="bar", x_column="body_type", y_column="units_sold", title="车型类别销量分析", task_folder="[current_task_folder]", save_name="categorical_body_type.png")
-7. create_file(file_name="categorical_comprehensive_analysis.md", file_contents="# 分类分析详细报告\n\n## 品牌竞争格局分析\n[详细分析各品牌市场表现、排名变化]\n\n## 市场份额与集中度\n[分析市场集中度、竞争激烈程度]\n\n## 车型类别分析\n[不同车型类别的市场表现]\n\n## 价格策略分析\n[不同品牌的价格定位策略]\n\n## 竞争优势识别\n[识别各品牌的竞争优势]\n\n## 市场机会分析\n[识别潜在的市场机会]", task_folder="[current_task_folder]")
-8. data_export(data_dict={"analysis_type": "categorical_analysis", "brand_rankings": "detailed results"}, file_name="categorical_analysis_results", export_format="json", task_folder="[current_task_folder]")
-```
+**RULE 2: Based on step type, add these specialized tools:**
 
-**If step contains "趋势分析" or "Trend Analysis":**
-```
-1. read_csv_data(file_path="./data/China Automobile Sales Data.csv")
-2. trend_analysis(file_path="./data/China Automobile Sales Data.csv", date_column="year_month", value_column="units_sold", task_folder="[current_task_folder]")
-3. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="line", x_column="year_month", y_column="units_sold", title="汽车销量时间趋势分析", task_folder="[current_task_folder]", save_name="temporal_sales_trend.png")
-4. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="bar", x_column="year_month", y_column="units_sold", title="月度销量对比分析", task_folder="[current_task_folder]", save_name="temporal_monthly_comparison.png")
-5. create_file(file_name="temporal_trend_analysis.md", file_contents="# 时间序列趋势分析报告\n\n## 整体趋势概述\n[描述销量的整体变化趋势]\n\n## 增长率分析\n[计算并分析各时期的增长率]\n\n## 季节性模式\n[识别季节性销售模式]\n\n## 趋势拐点分析\n[识别重要的趋势变化点]\n\n## 市场周期分析\n[分析市场的周期性特征]\n\n## 未来趋势预测\n[基于历史数据的趋势预测]", task_folder="[current_task_folder]")
-6. data_export(data_dict={"analysis_type": "temporal_analysis", "trend_findings": "detailed trend analysis"}, file_name="temporal_analysis_results", export_format="json", task_folder="[current_task_folder]")
-```
+For "数据加载/质量评估" steps - ADD:
+4. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="hist", x_column="units_sold", title="销量分布", task_folder=state_task_folder, save_name="data_distribution.png")
+5. outlier_detection(file_path="./data/China Automobile Sales Data.csv", column_name="units_sold", method="both", task_folder=state_task_folder)
 
-**If step contains "相关性分析" or "Correlation Analysis":**
-```
-1. read_csv_data(file_path="./data/China Automobile Sales Data.csv")
-2. correlation_analysis(file_path="./data/China Automobile Sales Data.csv", task_folder="[current_task_folder]")
-3. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="heatmap", x_column="", title="变量相关性热力图分析", task_folder="[current_task_folder]", save_name="correlation_heatmap.png")
-4. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="scatter", x_column="low_price", y_column="units_sold", title="价格与销量相关性分析", task_folder="[current_task_folder]", save_name="correlation_price_sales.png")
-5. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="scatter", x_column="high_price", y_column="units_sold", title="高端价格与销量关系", task_folder="[current_task_folder]", save_name="correlation_high_price_sales.png")
-6. create_file(file_name="correlation_comprehensive_analysis.md", file_contents="# 相关性分析详细报告\n\n## 变量关系概述\n[描述各变量间的相关性强度]\n\n## 价格敏感性分析\n[分析价格对销量的影响]\n\n## 强相关关系识别\n[识别并解释强相关关系]\n\n## 因果关系推断\n[基于相关性进行因果推断]\n\n## 商业洞察\n[从相关性分析中得出的商业洞察]\n\n## 策略建议\n[基于关系分析的策略建议]", task_folder="[current_task_folder]")
-7. data_export(data_dict={"analysis_type": "correlation_analysis", "correlations": "detailed correlation findings"}, file_name="correlation_analysis_results", export_format="json", task_folder="[current_task_folder]")
-```
+For "分类分析" steps - ADD:
+4. category_analysis(file_path="./data/China Automobile Sales Data.csv", category_column="brand", value_column="units_sold", task_folder=state_task_folder)
+5. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="pie", x_column="brand", title="市场份额", task_folder=state_task_folder, save_name="market_share.png")
+
+For "趋势分析" steps - ADD:
+4. trend_analysis(file_path="./data/China Automobile Sales Data.csv", date_column="year_month", value_column="units_sold", task_folder=state_task_folder)
+5. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="line", x_column="year_month", y_column="units_sold", title="趋势分析", task_folder=state_task_folder, save_name="trend_line.png")
+
+For "相关性分析" steps - ADD:
+4. correlation_analysis(file_path="./data/China Automobile Sales Data.csv", task_folder=state_task_folder)
+5. create_visualization(file_path="./data/China Automobile Sales Data.csv", chart_type="scatter", x_column="low_price", y_column="units_sold", title="价格相关性", task_folder=state_task_folder, save_name="price_correlation.png")
+
+**RULE 3: ALWAYS end with these 2 tools for ANY step:**
+6. create_file(file_name="step_analysis_summary.md", file_contents="# 分析步骤总结报告\\n\\n## 当前步骤\\n详细分析当前步骤的发现\\n\\n## 数据洞察\\n具体的数值发现和模式\\n\\n## 图表说明\\n解释生成的图表含义\\n\\n## 关键发现\\n本步骤的重要发现\\n\\n## 业务建议\\n基于分析的建议", task_folder=state_task_folder)
+7. data_export(data_dict=step_analysis_results, file_name="step_results", export_format="json", task_folder=state_task_folder)
+
+🛑 YOU MUST EXECUTE EXACTLY 7 TOOLS PER STEP
+🛑 DO NOT SKIP ANY OF THE 7 MANDATORY TOOLS ABOVE
 </step_specific_requirements>
 
 <language_detection>
