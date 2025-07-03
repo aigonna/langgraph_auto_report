@@ -25,7 +25,7 @@ def get_llm():
     """获取LLM实例，使用LiteLLM统一适配多个模型"""
     
     # 从环境变量获取模型配置
-    model_name = os.getenv("MODEL_NAME", "gemini-2.5-flash") 
+    model_name = os.getenv("MODEL_NAME", "gemini/gemini-2.0-flash-exp")  # 使用gemini/前缀强制走Google AI Studio
     temperature = float(os.getenv("TEMPERATURE", "0.1"))
     max_tokens = int(os.getenv("MAX_TOKENS", "128000"))  # Gemini-2.5-flash支持更大的token数
     
